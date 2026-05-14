@@ -1,0 +1,38 @@
+---
+- name: Install and configure zabbix 7.4 client
+  hosts: all
+  tasks:
+    - name: Install zabbix 7.4 repository for debian from rpm
+      when: ansible_os_family == "Debian"
+      ansible.builtin.apt:
+        deb: "https://repo.zabbix.com/zabbix/7.4/release/{{ ansible_distribution | lower }}/pool/main/z/zabbix-release/zabbix-release_latest_7.4+{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}_all.deb"
+        state: present
+
+    - name: Install zabbix 7.4 repository for redhat from rpm
+      when: ansible_os_family == "RedHat"
+      ansible.builtin.yum:
+        name: "https://repo.zabbix.com/zabbix/7.4/release/rhel/{{ ansible_distribution_major_version }}/noarch/zabbix-release-7.4.el{{ ansible_distribution_major_version }}.noarch.rpm"
+        state: present
+
+    - name: Install zabbix-agent
+      when: ansible_os_family == "Debian"
+      ansible.builtin.package:
+        name: zabbix-agent
+        state: present
+
+    - name: Install zabbix-agent
+      when: ansible_os_family == "RedHat"
+      ansible.builtin.package:
+        name: zabbix-agent
+        state: present
+
+    - name: Configure zabbix-agent
+      ansible.builtin.template:
+        src: zabbix_agentd.conf.j2
+        dest: /etc/zabbix/zabbix_agentd.conf
+        
+    - name: Start zabbix-agent
+      ansible.builtin.service:
+        name: zabbix-agent
+        state: started
+        enabled: true
