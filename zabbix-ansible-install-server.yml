@@ -1,0 +1,48 @@
+---
+- name: Install and configure zabbix 7.4 on ubuntu 24.04
+  hosts: all
+  tasks:
+    - name: Install zabbix repository
+      ansible.builtin.apt:
+        deb: https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_7.4-1+ubuntu24.04_all.deb
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install mysql server and client
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - mysql-server
+        - mysql-client
+
+    - name: Install all zabbix server packages witht a loop
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - zabbix-server-mysql
+        - zabbix-frontend-php
+        - zabbix-apache-conf
+        - zabbix-sql-scripts
+        - zabbix-agent
+
+    - name: Run many mysql commands using shell module to configure zabbix database
+      ansible.builtin.shell: |
+        mysql -uroot -e "CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;"
+        mysql -uroot -e "CREATE USER 'zabbix'@'localhost' IDENTIFIED BY 'zabbix';"
+        mysql -uroot -e "GRANT ALL PRIVILEGES ON zabbix.* TO 'zabbix'@'localhost';"
+        mysql -uroot -e "set global log_bin_trust_function_creators = 1;"
+      register: mysql_output
+
+    - name: Configure zabbix server
+      ansible.builtin.template:
+        src: zabbix_server.conf.j2
+        dest: /etc/zabbix/zabbix_server.conf
+        
+    - name: Restart zabbix server
+      ansible.builtin.service:
+        name: zabbix-server
+        state: restarted
