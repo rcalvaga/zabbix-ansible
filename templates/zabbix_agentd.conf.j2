@@ -181,7 +181,7 @@ ServerActive="{{ zabbix_server }}"
 # Default:
 # Hostname=
 
-Hostname="{{ zabbix_host }}"
+Hostname="{{ inventory_hostname }}"
 
 ### Option: HostnameItem
 #	Item used for generating Hostname if it is undefined. Ignored if Hostname is defined.
