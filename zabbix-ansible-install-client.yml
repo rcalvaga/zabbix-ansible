@@ -11,7 +11,7 @@
     - name: Install zabbix 7.4 repository for redhat from rpm
       when: ansible_os_family == "RedHat"
       ansible.builtin.yum:
-        name: "https://repo.zabbix.com/zabbix/7.4/release/rhel/{{ ansible_distribution_major_version }}/noarch/zabbix-release-7.4.el{{ ansible_distribution_major_version }}.noarch.rpm"
+        name: "https://repo.zabbix.com/zabbix/7.4/release/rhel/{{ ansible_distribution_major_version }}/noarch/zabbix-release-latest-7.4.el{{ ansible_distribution_major_version }}.noarch.rpm"
         state: present
 
     - name: Install zabbix-agent
